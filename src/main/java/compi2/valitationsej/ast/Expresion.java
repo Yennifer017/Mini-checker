@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package compi2.valitationsej.ast;
+import compi2.valitationsej.components.Type;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +18,9 @@ public class Expresion {
     private String symbol;
     private Expresion rightExp;
     private Expresion leftExp;
+    
+    private int line;
+    private int col;
 
     public Expresion(Type type) {
         this.type = type;
@@ -32,6 +36,17 @@ public class Expresion {
         this.operation = operation;
     }
     
+    public void setReference(int line, int col){
+        this.line = line;
+        this.col = col;
+    }
     
+    public boolean isLeaf(){
+        return this.rightExp == null && this.leftExp == null;
+    }
+    
+    public boolean isVector(){
+        return this.operation == null && this.leftExp != null;
+    }
     
 }

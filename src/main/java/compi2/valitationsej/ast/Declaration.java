@@ -4,6 +4,7 @@
  */
 package compi2.valitationsej.ast;
 
+import compi2.valitationsej.components.Type;
 import java.util.ArrayList;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,12 +15,12 @@ import lombok.Setter;
  */
 @Getter @Setter
 public class Declaration {
-    private Type type;
+    private Type typeDef;
     private Expresion typeExp;
     private ArrayList<String> ids;
 
-    public Declaration(Type type, Expresion typeExp) {
-        this.type = type;
+    public Declaration(Type typeDef, Expresion typeExp) {
+        this.typeDef = typeDef;
         this.typeExp = typeExp;
         ids = new ArrayList<>();
     }

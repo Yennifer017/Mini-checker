@@ -5,13 +5,12 @@
 
 package compi2.valitationsej.analysis;
 
+import compi2.valitationsej.components.Type;
 import java_cup.runtime.*;
 import java.util.*;
 import compi2.valitationsej.ast.*;
 import static compi2.valitationsej.ast.Operation.*;
-import compi2.valitationsej.ast.Type.*;
-import static compi2.valitationsej.ast.Type.*;
-import java_cup.runtime.XMLElement;
+import static compi2.valitationsej.components.Type.*;
 
 /** CUP v0.11b 20160615 (GIT 4ac7450) generated parser.
   */
@@ -27,7 +26,7 @@ public class Parser extends java_cup.runtime.lr_parser {
   public Parser() {super();}
 
   /** Constructor which sets the default scanner. */
-  @Deprecated
+  @Deprecated   
   public Parser(java_cup.runtime.Scanner s) {super(s);}
 
   /** Constructor which sets the default scanner. */

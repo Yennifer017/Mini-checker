@@ -14,11 +14,17 @@ parser code {:
     //fields
     Lexer lex;
     private List<String> syntaxErrors;
+    private List<String> semanticErrors;
+    private HashMap<String, SymbolT> st;
+    private Valitator valitator;
 
     //conect the parser with the lexer
     public Parser(Lexer lex){
         super(lex);
         syntaxErrors = new LinkedList<>();
+        semanticErrors = new LinkedList<>();
+        st = new HashMap<>();
+        valitator = new Valitator();
     }
 
     //getters
@@ -27,6 +33,9 @@ parser code {:
     }
     public List<String> getSyntaxErrors(){
         return this.syntaxErrors;
+    }
+    public List<String> getSemanticErrors(){
+        return this.semanticErrors;
     }
     
     /*SOBREESCRIBIENDO LOS METODOS DE ERROR*/
@@ -53,11 +62,12 @@ terminal Float      FLOAT_LIT;
 terminal Integer    INTEGER_LIT;
 
 /* Non-terminals */
-non terminal        s, asignation;
+non terminal        s;
 non terminal Expresion expresion, vect;
 non terminal Type dec_type;
 non terminal Declaration type, declaration;
 non terminal ArrayList<String> ident;
+non terminal Asignation asignation;
 
 /* Precedences */
 precedence left MAS, POR, UMINUS;
@@ -71,11 +81,13 @@ declaration ::= type:d ident:l FIN declaration:D
                     {:
                         d.setIds(l);
                         RESULT = d;
+                        valitator.insertIntoST(D, st, semanticErrors);
                     :}
     | type:d ident:l FIN    
                     {:
                         d.setIds(l);
                         RESULT = d;
+                        valitator.insertIntoST(d, st, semanticErrors);
                     :}
     ;
 
@@ -114,10 +126,14 @@ ident ::= ident:l COMA ID:id
 asignation ::= ID vect:vE IGUAL expresion:e FIN asignation
                     {:
                         Asignation asign = new Asignation(vE, e);
+                        RESULT = asign;
+                        valitator.validate(asign, st, semanticErrors);
                     :}
     | ID vect:vE IGUAL expresion:e FIN 
                     {:
                         Asignation asign = new Asignation(vE, e);
+                        RESULT = asign;
+                        valitator.validate(asign, st, semanticErrors);
                     :}
     ;
 
@@ -131,10 +147,10 @@ expresion ::= expresion:e1 MAS expresion:e2
                     :}
     %prec UMINUS
     | PARENTESIS_L expresion:e PARENTESIS_R     {: RESULT = e; :}
-    | INTEGER_LIT   {: RESULT = new Expresion(ENTERO);   :}
-    | FLOAT_LIT     {: RESULT = new Expresion(DECIMAL);   :}
-    | STRING_LIT    {: RESULT = new Expresion(CADENA);   :}
-    | BTRUE         {: RESULT = new Expresion(BOOLEANO);   :}
-    | BFALSE        {: RESULT = new Expresion(BOOLEANO);   :}
-    | ID:id vect:vE {: vE.setSymbol(id); RESULT = vE; :}
+    | INTEGER_LIT   {: RESULT = new Expresion(Type.ENTERO);   :}
+    | FLOAT_LIT     {: RESULT = new Expresion(Type.DECIMAL);   :}
+    | STRING_LIT    {: RESULT = new Expresion(Type.CADENA);   :}
+    | BTRUE         {: RESULT = new Expresion(Type.BOOLEANO);   :}
+    | BFALSE        {: RESULT = new Expresion(Type.BOOLEANO);   :}
+    | ID:id vect:vE {: vE.setSymbol(Type.id); RESULT = vE; :}
     ;
