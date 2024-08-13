@@ -14,19 +14,23 @@ import java.io.StringReader;
 public class ValitationsEj {
 
     public static void main(String[] args) {
-        StringReader reader = new StringReader("int id1;\n"
-                + "int id2,id4;\n"
-                + "int[25] id3;\n"
-                + "string[12] id5;\n"
-                + "\n"
-                + "id1 = 5 * 12.5 + id3[5];\n"
-                + "id2 = id3[2];");
+        StringReader reader = new StringReader("""
+                                               int id1;
+                                               int id2,id4;
+                                               int[25] id3;
+                                               string[12] id5;
+                                               
+                                               id1 = 5 * 12.5 + id3[5];
+                                               id2 = id3[2];
+                                               id3 = (5+4) * 1;""");
         Lexer lexer = new Lexer(reader);
         Parser parser = new Parser(lexer);
         try {
             parser.parse();
             if(parser.getSyntaxErrors().isEmpty()){
                 System.out.println("Sin errores sintacticos");
+            } else {
+                System.out.println("Hay errores sintacticos");
             }
         } catch (Exception e) {
             System.out.println(e);

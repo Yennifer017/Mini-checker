@@ -4,6 +4,9 @@ package compi2.valitationsej.analysis;
 import java_cup.runtime.*;
 import java.util.*;
 
+
+import compi2.valitationsej.ast.*;
+import compi2.valitationsej.ast.Type.*;
 /*-----------------------------------------------------------
   CUP Specification for the Parser Class
   -----------------------------------------------------------*/
@@ -43,15 +46,18 @@ parser code {:
 
 /* Terminals (tokens returned by the scanner). */
 terminal            FIN, COMA, CORCHETE_L, CORCHETE_R, PARENTESIS_L, PARENTESIS_R, MAS, POR, IGUAL, 
-                    BTRUE, BFALSE, BOOL_I, INT_I, FLOAT_I, DEC_I, CADENA;
+                    BTRUE, BFALSE, BOOL_I, INT_I, DEC_I, CADENA;
 terminal            UMINUS, VECTORS;
 terminal String     ID, STRING_LIT;
 terminal Float      FLOAT_LIT;
 terminal Integer    INTEGER_LIT;
 
 /* Non-terminals */
-non terminal        s, declaration, type, dec_type, value, asignation, expresion;
-non terminal Integer vect;
+non terminal        s, asignation;
+non terminal Expresion expresion, vect;
+non terminal Type dec_type;
+non terminal Declaration type, declaration;
+non terminal ArrayList<String> ident;
 
 /* Precedences */
 precedence left MAS, POR, UMINUS;
@@ -61,42 +67,74 @@ start with s;
 s ::= declaration asignation;
 
 
-declaration ::= type value FIN declaration
-    | type value FIN
+declaration ::= type:d ident:l FIN declaration:D
+                    {:
+                        d.setIds(l);
+                        RESULT = d;
+                    :}
+    | type:d ident:l FIN    
+                    {:
+                        d.setIds(l);
+                        RESULT = d;
+                    :}
     ;
 
-type ::= dec_type vect
+type ::= dec_type:t vect:e  {: RESULT = new Declaration(t, e); :}
     ;
 
-dec_type ::= INT_I
-    | FLOAT_I
-    | CADENA
-    | BOOL_I
-    | DEC_I 
+dec_type ::= INT_I  {: RESULT = ENTERO; :}
+    | CADENA        {: RESULT = CADENA; :}
+    | BOOL_I        {: RESULT = BOOLEANO; :}
+    | DEC_I         {: RESULT = DECIMAL; :}
     ;
 
-vect ::= CORCHETE_L expresion CORCHETE_R
-    | /*empty*/
+vect ::= CORCHETE_L expresion:e CORCHETE_R    
+                    {: 
+                        Expresion expresion = new Expresion(VECTOR);
+                        expresion.setLeftExp(e);
+                        RESULT = expresion;
+                    :}
+    | /*empty*/     {: RESULT = new Expresion(ID); :}
     ;
 
-value ::= value COMA ID
-    | ID
+ident ::= ident:l COMA ID:id
+                    {:
+                        l.add(id);
+                        RESULT = l;
+                    :}
+    | ID:id         {: 
+                        ArrayList<String> ids = new ArrayList<>();
+                        ids.add(id);
+                        RESULT = ids;
+                    :}
     ;
 
 
 
-asignation ::= ID IGUAL expresion FIN asignation
-    | ID IGUAL expresion FIN
+asignation ::= ID vect:vE IGUAL expresion:e FIN asignation
+                    {:
+                        Asignation asign = new Asignation(vE, e);
+                    :}
+    | ID vect:vE IGUAL expresion:e FIN 
+                    {:
+                        Asignation asign = new Asignation(vE, e);
+                    :}
     ;
 
-expresion ::= expresion MAS expresion
-    | expresion POR expresion
+expresion ::= expresion:e1 MAS expresion:e2 
+                    {: 
+                        RESULT = new Expresion(SUMA, e2, e1);
+                    :}
+    | expresion:e1 POR expresion:e2
+                    {: 
+                        RESULT = new Expresion(MULTIPLICACION, e2, e1);
+                    :}
     %prec UMINUS
-    | PARENTESIS_L  expresion PARENTESIS_R
-    | INTEGER_LIT
-    | FLOAT_LIT
-    | STRING_LIT
-    | BTRUE
-    | BFALSE
-    | ID vect
+    | PARENTESIS_L expresion:e PARENTESIS_R     {: RESULT = e; :}
+    | INTEGER_LIT   {: RESULT = new Expresion(ENTERO);   :}
+    | FLOAT_LIT     {: RESULT = new Expresion(DECIMAL);   :}
+    | STRING_LIT    {: RESULT = new Expresion(CADENA);   :}
+    | BTRUE         {: RESULT = new Expresion(BOOLEANO);   :}
+    | BFALSE        {: RESULT = new Expresion(BOOLEANO);   :}
+    | ID:id vect:vE {: vE.setSymbol(id); RESULT = vE; :}
     ;

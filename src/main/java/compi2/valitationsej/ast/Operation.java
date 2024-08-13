@@ -8,11 +8,8 @@ package compi2.valitationsej.ast;
  *
  * @author blue-dragon
  */
-public enum Type {
-    ENTERO,
-    DECIMAL,
-    BOOLEANO,
-    ID,
-    VECTOR,
-    CADENA;
+public enum Operation {
+    SUMA,
+    MULTIPLICACION,
+    ;
 }
