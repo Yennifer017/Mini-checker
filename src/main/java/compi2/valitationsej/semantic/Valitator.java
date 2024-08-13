@@ -46,14 +46,12 @@ public class Valitator {
     }
     
     public void validate(Asignation asign, HashMap<String, SymbolT> st, List<String> errors){
-        //existe la variable
-        //tiene el tipo adecuado
         String varName = asign.getVariable().getSymbol();
         if(!st.containsKey(varName)){
             errors.add("No se encontro la variable " + varName
                     + ", no se puede asignarle ningun valor." );
         } else if(st.get(varName).getType() != validate(asign.getExpresion(), st, errors)){
-            errors.add("No se puede asignar a la variable" + varName 
+            errors.add("No se puede asignar a la variable " + varName 
                     + " el tipo de dato especificado, porque no es el adecuado" );
         }
         

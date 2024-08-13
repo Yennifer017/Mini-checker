@@ -4,9 +4,11 @@ package compi2.valitationsej.analysis;
 import java_cup.runtime.*;
 import java.util.*;
 
-
+import java.util.*;
 import compi2.valitationsej.ast.*;
-import compi2.valitationsej.ast.Type.*;
+import compi2.valitationsej.components.SymbolT;
+import compi2.valitationsej.components.Type;
+import compi2.valitationsej.semantic.Valitator;
 /*-----------------------------------------------------------
   CUP Specification for the Parser Class
   -----------------------------------------------------------*/
@@ -77,16 +79,16 @@ start with s;
 s ::= declaration asignation;
 
 
-declaration ::= type:d ident:l FIN declaration:D
+declaration ::= declaration:D type:d ident:l FIN
                     {:
                         d.setIds(l);
-                        RESULT = d;
-                        valitator.insertIntoST(D, st, semanticErrors);
+                        //RESULT = d;
+                        valitator.insertIntoST(d, st, semanticErrors);
                     :}
     | type:d ident:l FIN    
                     {:
                         d.setIds(l);
-                        RESULT = d;
+                        /*RESULT = d;*/
                         valitator.insertIntoST(d, st, semanticErrors);
                     :}
     ;
@@ -94,19 +96,19 @@ declaration ::= type:d ident:l FIN declaration:D
 type ::= dec_type:t vect:e  {: RESULT = new Declaration(t, e); :}
     ;
 
-dec_type ::= INT_I  {: RESULT = ENTERO; :}
-    | CADENA        {: RESULT = CADENA; :}
-    | BOOL_I        {: RESULT = BOOLEANO; :}
-    | DEC_I         {: RESULT = DECIMAL; :}
+dec_type ::= INT_I  {: RESULT = Type.ENTERO; :}
+    | CADENA        {: RESULT = Type.CADENA; :}
+    | BOOL_I        {: RESULT = Type.BOOLEANO; :}
+    | DEC_I         {: RESULT = Type.DECIMAL; :}
     ;
 
 vect ::= CORCHETE_L expresion:e CORCHETE_R    
                     {: 
-                        Expresion expresion = new Expresion(VECTOR);
+                        Expresion expresion = new Expresion(Type.VECTOR);
                         expresion.setLeftExp(e);
                         RESULT = expresion;
                     :}
-    | /*empty*/     {: RESULT = new Expresion(ID); :}
+    | /*empty*/     {: RESULT = new Expresion(Type.ID); :}
     ;
 
 ident ::= ident:l COMA ID:id
@@ -123,14 +125,16 @@ ident ::= ident:l COMA ID:id
 
 
 
-asignation ::= ID vect:vE IGUAL expresion:e FIN asignation
+asignation ::= asignation ID:id vect:vE IGUAL expresion:e FIN
                     {:
+                        vE.setSymbol(id);
                         Asignation asign = new Asignation(vE, e);
                         RESULT = asign;
                         valitator.validate(asign, st, semanticErrors);
                     :}
-    | ID vect:vE IGUAL expresion:e FIN 
+    | ID:id vect:vE IGUAL expresion:e FIN 
                     {:
+                        vE.setSymbol(id);
                         Asignation asign = new Asignation(vE, e);
                         RESULT = asign;
                         valitator.validate(asign, st, semanticErrors);
@@ -139,11 +143,11 @@ asignation ::= ID vect:vE IGUAL expresion:e FIN asignation
 
 expresion ::= expresion:e1 MAS expresion:e2 
                     {: 
-                        RESULT = new Expresion(SUMA, e2, e1);
+                        RESULT = new Expresion(Operation.SUMA, e2, e1);
                     :}
     | expresion:e1 POR expresion:e2
                     {: 
-                        RESULT = new Expresion(MULTIPLICACION, e2, e1);
+                        RESULT = new Expresion(Operation.MULTIPLICACION, e2, e1);
                     :}
     %prec UMINUS
     | PARENTESIS_L expresion:e PARENTESIS_R     {: RESULT = e; :}
@@ -152,5 +156,5 @@ expresion ::= expresion:e1 MAS expresion:e2
     | STRING_LIT    {: RESULT = new Expresion(Type.CADENA);   :}
     | BTRUE         {: RESULT = new Expresion(Type.BOOLEANO);   :}
     | BFALSE        {: RESULT = new Expresion(Type.BOOLEANO);   :}
-    | ID:id vect:vE {: vE.setSymbol(Type.id); RESULT = vE; :}
+    | ID:id vect:vE {: vE.setSymbol(id); RESULT = vE; :}
     ;

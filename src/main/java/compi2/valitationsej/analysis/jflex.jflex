@@ -68,6 +68,8 @@ DecFloatLiteral = {DecIntegerLiteral}\.{DecIntegerLiteral}
     "+"             { return symbol(sym.MAS); }
     "*"             { return symbol(sym.POR); }
     "="             { return symbol(sym.IGUAL); }
+    "("             { return symbol(sym.PARENTESIS_L); }
+    ")"             { return symbol(sym.PARENTESIS_R); }
 
     /* keywords */
     <YYINITIAL> "true"              { return symbol(sym.BTRUE);      }
